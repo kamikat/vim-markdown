@@ -669,6 +669,19 @@ function! s:MarkdownHighlightSources(force)
         return
     endif
 
+    " Include JSX support for MDX files
+    if a:force || !has_key(b:mkd_known_filetypes, 'jsx')
+      call s:SyntaxInclude('javascript')
+      call s:SyntaxInclude('jsx')
+      execute 'syntax region mkdJSXRegion start="^\@<=\(import\|export\)\s" end="^$" keepend contains=@JAVASCRIPT'
+      execute 'syntax cluster mkdNonListItem add=mkdJSXRegion'
+      execute 'syntax region mkdJSXTag start="^\@<=<" end="^$" keepend contains=jsxRegion,jsxElement'
+      execute 'syntax cluster mkdNonListItem add=mkdJSXTag'
+      let b:mkd_included_filetypes['jsx'] = 1
+      let b:mkd_included_filetypes['javascript'] = 1
+      let b:mkd_known_filetypes['jsx'] = 1
+    endif
+
     " Now we're ready to actually highlight the code blocks.
     let startgroup = 'mkdCodeStart'
     let endgroup = 'mkdCodeEnd'
